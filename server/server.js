@@ -7,6 +7,9 @@ const path = require('path');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 
+// Route imports
+const authRoutes = require('./routes/authRoutes')
+
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -28,25 +31,21 @@ app.use(
     })
   );
 
-const socketIO = require('socket.io')(http, {
-    cors: {
-        origin: "http://localhost:5173"
-    }
-});
+app.use('/authentication', authRoutes)
 
-socketIO.on('connection', (socket) => {
-    console.log(`⚡: ${socket.id} user just connected!`);
-    socket.on('disconnect', () => {
-            socket.disconnect()
-      console.log('🔥: A user disconnected');
-    });
-});
+// const socketIO = require('socket.io')(http, {
+//     cors: {
+//         origin: "http://localhost:5173"
+//     }
+// });
 
-app.get("/api", (req, res) => {
-    res.json({
-        message: "Hello world",
-    });
-});
+// socketIO.on('connection', (socket) => {
+//     console.log(`⚡: ${socket.id} user just connected!`);
+//     socket.on('disconnect', () => {
+//             socket.disconnect()
+//       console.log('🔥: A user disconnected');
+//     });
+// });
 
 app.listen(PORT, () => {
     console.log(`Server listening on ${PORT}`);
