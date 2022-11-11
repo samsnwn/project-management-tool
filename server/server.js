@@ -1,18 +1,36 @@
 const express = require("express");
 const app = express();
+require('dotenv').config()
 const PORT = process.env.PORT || 4000;
+const mongoose = require('mongoose');
+const path = require('path');
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
+
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+mongoose.connect(process.env.DB_LINK, () => {
+    console.log('Database connected')
+})
+
 const http = require("http").Server(app);
 const cors = require("cors");
 
-app.use(cors());
+app.use(cors({ origin: "http://localhost:5173", credentials: true}));
+app.use(cookieParser());
+app.use(
+    session({
+      secret: process.env.SECRET_KEY,
+      resave: false,
+      saveUninitialized: true
+    })
+  );
 
 const socketIO = require('socket.io')(http, {
     cors: {
-        origin: "http://localhost:3000"
+        origin: "http://localhost:5173"
     }
 });
 
