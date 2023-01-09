@@ -4,7 +4,7 @@ const {registrationController, loginController} = require('../controllers/authCo
 const { checkingUser } = require('../validation/registerValidation');
 const { userValidation } = require('../validation/schemaValidation');
 
-router.post('/register', checkingUser, userValidation, registrationController)
-router.post('/login', userValidation, loginController)
+router.post('/register', registrationController)
+router.post('/login', loginController)
 
 module.exports = router

@@ -38,10 +38,10 @@ const Login = () => {
     <div className="login__container">
       <form className="login__form" onSubmit={onSubmitHandler}>
         <div>
-          <label htmlFor="email">Email:</label>
+          <label htmlFor="username">Username:</label>
           <input
-            type="email"
-            name="email"
+            type="username"
+            name="username"
             required
             onChange={onChangeHandler}
           />

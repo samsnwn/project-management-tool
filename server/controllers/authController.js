@@ -1,41 +1,66 @@
-const User = require('../models/UserModel')
+const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const ExpressError = require("../ExpressError");
+const jwt = require("jsonwebtoken");
 
+const signToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+};
 
 // Registration function
 exports.registrationController = async (req, res, next) => {
-    const user = req.body
-    try {
-        const newUser = new User(user)
+  const { username, password, confirmPassword } = req.body;
+  try {
+    //  Check if username is already in use
+    const existingUser = await User.findOne({ username });
+    // If it does not exist:
+    if (!existingUser) {
+      const newUser = await User.create({
+        username,
+        password,
+        confirmPassword,
+      });
 
-        // Password encryption
-        const salt = await bcrypt.genSalt(10);
-        const hash = await bcrypt.hash(user.password, salt);
-        newUser.password = hash;
+      const token = signToken(newUser._id);
 
-        await newUser.save()
-        res.send('Successful registration')
-    } catch (err) {
-        next(new ExpressError('Failed to register user', 300))
+      res
+        .status(201)
+        .json({ status: "success", token, data: { user: newUser } });
+    } else {
+      // Username already in use
+      next(new ExpressError("Username already in use", 300));
     }
-}
-
+  } catch (err) {
+    next(new ExpressError("Failed to register user", 300));
+  }
+};
 
 // login function
 exports.loginController = async (req, res, next) => {
-    const {email, password} = req.body
+  const { username, password } = req.body;
 
-    try {
-        const user = await User.findOne({ email: email})
-        if(await bcrypt.compare(password, user.password)) {
-            req.session.user = await User.findOne({ email: email}).select('-password')
-            console.log(req.session.user)
-            res.json(req.session.user)
-        } else {
-            throw new ExpressError('Invalid email or password', 300)
-        }
-    } catch (err) {
-        next(new ExpressError('Invalid email or password', 300))
+  // //  1) Check if username and password exist
+  // if (!username || !password) {
+  //   return next(new ExpressError("Please provide username and password", 400));
+  // }
+
+  try {
+    //  2) Check if user exists
+    const user = await User.findOne({ username });
+
+    if (!user || !(await user.correctPassword(password, user.password))) {
+      return next(new ExpressError("Invalid email or password", 401));
     }
-}
+    //  3) If everything is ok, send token to client
+    const token = signToken(user._id);
+    res.status(200).json({
+      status: "success",
+      token,
+      login: true,
+    });
+  } catch (err) {
+    return next(new ExpressError("Invalid email or password", 401));
+  }
+};

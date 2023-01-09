@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios"
 
 const Register = () => {
+  const navigate = useNavigate()
   const [userInput, setUserInput]  = useState();
 
   const onChangeHandler = (e) => {
@@ -19,7 +21,7 @@ const Register = () => {
 
     try {
       const data = await axios.post('http://localhost:4000/authentication/register', userInput)
-      console.log(data);
+      navigate('/login')
     } catch (err) {
       console.log(err)
     }
@@ -28,15 +30,6 @@ const Register = () => {
   return (
     <div className="login__container">
       <form className="login__form" onSubmit={onSubmitHandler}>
-        <div>
-          <label htmlFor="email">Email: </label>
-          <input
-            type="email"
-            name="email"
-            required
-            onChange={onChangeHandler}
-          />
-        </div>
         <div>
           <label htmlFor="username">Username: </label>
           <input

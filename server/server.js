@@ -2,34 +2,29 @@ const express = require("express");
 const app = express();
 require('dotenv').config()
 const PORT = process.env.PORT || 4000;
+const secret = `secret_key` || process.env.SECRET_KEY || "test";
 const mongoose = require('mongoose');
 const path = require('path');
-const session = require('express-session');
+// const session = require('express-session');
+const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 
 // Route imports
 const authRoutes = require('./routes/authRoutes')
 
 
-app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 mongoose.connect(process.env.DB_LINK, () => {
     console.log('Database connected')
 })
 
-const http = require("http").Server(app);
 const cors = require("cors");
 
 app.use(cors({ origin: "http://localhost:5173", credentials: true}));
 app.use(cookieParser());
-app.use(
-    session({
-      secret: process.env.SECRET_KEY,
-      resave: false,
-      saveUninitialized: true
-    })
-  );
+
 
 app.use('/authentication', authRoutes)
 
