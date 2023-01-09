@@ -1,21 +1,30 @@
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
+
 import { Routes, Route } from "react-router-dom";
-import Comments from "./components/pages/Comments";
-import Login from "./components/authentication/Login";
-import Task from "./components/pages/Task";
-import Register from "./components/authentication/Register";
-import Home from "./components/pages/Home";
-import Profile from "./components/pages/Profile";
+
+import Home from "./pages/Home";
+import Board from "./pages/Board";
+import Register from "./pages/authentication/Register";
+import Login from "./pages/authentication/Login";
+import AppLayout from "./components/layout/AppLayout";
+import AuthLayout from "./components/layout/AuthLayout";
 
 function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/task" element={<Task />} />
-        <Route path="/comments/:category/:id" element={<Comments />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/" element={<AuthLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Route>
+        <Route path="/" element={<AppLayout />}>
+          <Route index element={<Home />} />
+          <Route path="/boards" element={<Home />} />
+          <Route path="/boards/:boardsId" element={<Board />} />
+        </Route>
       </Routes>
     </>
   );

@@ -27,13 +27,13 @@ exports.registrationController = async (req, res, next) => {
 
       res
         .status(201)
-        .json({ status: "success", token, data: { user: newUser } });
+        .json({ status: "success", token, user: newUser });
     } else {
       // Username already in use
       next(new ExpressError("Username already in use", 300));
     }
   } catch (err) {
-    next(new ExpressError("Failed to register user", 300));
+    next(new ExpressError("Failed to register user", 500));
   }
 };
 
@@ -41,26 +41,24 @@ exports.registrationController = async (req, res, next) => {
 exports.loginController = async (req, res, next) => {
   const { username, password } = req.body;
 
-  // //  1) Check if username and password exist
-  // if (!username || !password) {
-  //   return next(new ExpressError("Please provide username and password", 400));
-  // }
-
   try {
     //  2) Check if user exists
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username }).select('password username');
 
     if (!user || !(await user.correctPassword(password, user.password))) {
       return next(new ExpressError("Invalid email or password", 401));
     }
+
+    user.password = undefined
     //  3) If everything is ok, send token to client
     const token = signToken(user._id);
     res.status(200).json({
       status: "success",
+      user,
       token,
       login: true,
     });
   } catch (err) {
-    return next(new ExpressError("Invalid email or password", 401));
+    return next(new ExpressError("Invalid email or password", 500));
   }
 };
